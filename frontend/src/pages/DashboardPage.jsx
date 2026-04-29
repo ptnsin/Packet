@@ -205,6 +205,7 @@ export default function DashboardPage() {
               <button className={styles.exportBtn}                              onClick={() => handleExport('csv')}  disabled={!!exporting}>{exporting === 'csv'  ? '⏳' : '⬇'} CSV</button>
               <button className={styles.exportBtn}                              onClick={() => handleExport('json')} disabled={!!exporting}>{exporting === 'json' ? '⏳' : '⬇'} JSON</button>
               <button className={`${styles.exportBtn} ${styles.exportPdf}`}    onClick={() => handleExport('pdf')}  disabled={!!exporting}>{exporting === 'pdf'  ? '⏳' : '📄'} PDF</button>
+              <button className={styles.exportBtn} onClick={() => navigate('/geo')}>🌍 Geo</button>
             </div>
           </div>
 
@@ -277,7 +278,11 @@ export default function DashboardPage() {
                   <td>{formatTimestamp(p.timestamp)}</td>
                   <td>{p.sourceIp}</td>
                   <td>{p.destIp}</td>
-                  <td><span className={protocolColor(p.protocol)}>{p.protocol}</span></td>
+                  <td>
+                    <span className={protocolColor(p.protocol)}>
+    {p.protocol.split(':').pop()}
+</span>
+                  </td>
                   <td>{p.length}</td>
                   <td className={p.isEncrypted ? styles.encYes : styles.encNo}>
                     {p.isEncrypted ? 'YES' : 'NO'}

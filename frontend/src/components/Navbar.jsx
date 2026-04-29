@@ -32,6 +32,12 @@ export default function Navbar({ live = false }) {
         >
           Dashboard
         </Link>
+        <Link
+          to="/history"
+          className={`${styles.link} ${location.pathname === '/history' ? styles.active : ''}`}
+        >
+          History
+        </Link>
         {role === 'admin' && (
           <Link
             to="/users"

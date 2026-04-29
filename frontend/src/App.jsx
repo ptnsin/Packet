@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import UsersPage from './pages/UsersPage.jsx'
+import HistoryPage from './pages/HistoryPage'
 
 function PrivateRoute({ children }) {
   const { token } = useAuth()
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path="/users" element={<AdminRoute><UsersPage /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/history" element={<HistoryPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

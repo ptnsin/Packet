@@ -1,0 +1,270 @@
+.main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pageTitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #e6edf3;
+    letter-spacing: 0.02em;
+}
+
+.pageSub {
+    font-size: 0.8rem;
+    color: #7d8590;
+    margin-top: 2px;
+}
+
+/* Export Buttons */
+.exportBtns {
+    display: flex;
+    gap: 8px;
+}
+
+.btnExport {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btnExport:hover {
+    background: #30363d;
+    border-color: #8b949e;
+}
+
+.btnPdf {
+    color: #ff7b72;
+    border-color: #ff7b7240;
+}
+
+.btnPdf:hover {
+    background: #ff7b7215;
+}
+
+/* Filter Card */
+.filterCard {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.filterField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filterField label {
+    font-size: 11px;
+    color: #7d8590;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filterField input,
+.filterField select {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #c9d1d9;
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.filterField input:focus,
+.filterField select:focus {
+    border-color: #00d2a8;
+}
+
+.filterActions {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.btnSearch {
+    background: #00d2a8;
+    color: #0d1117;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+}
+
+.btnSearch:hover { opacity: 0.85; }
+
+.btnReset {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #7d8590;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btnReset:hover {
+    border-color: #8b949e;
+    color: #c9d1d9;
+}
+
+/* Table */
+.tableWrap {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tableHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #21262d;
+}
+
+.tableTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+}
+
+.badgeCount {
+    font-size: 11px;
+    background: #21262d;
+    color: #7d8590;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead tr {
+    background: #0d1117;
+}
+
+.table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    color: #7d8590;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #21262d;
+}
+
+.table td {
+    padding: 10px 14px;
+    color: #c9d1d9;
+    border-bottom: 1px solid #21262d10;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+}
+
+.table tbody tr:hover {
+    background: #21262d40;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.emptyRow {
+    text-align: center;
+    color: #7d8590;
+    padding: 2rem !important;
+}
+
+.loading {
+    text-align: center;
+    color: #7d8590;
+    padding: 2rem;
+    font-size: 13px;
+}
+
+/* Protocol colors */
+.protoTls  { color: #00e676; font-size: 11px; }
+.protoHttp { color: #ff5252; font-size: 11px; }
+.protoDns  { color: #40c4ff; font-size: 11px; }
+.protoUdp  { color: #ffd740; font-size: 11px; }
+.protoTcp  { color: #ce93d8; font-size: 11px; }
+.proto     { color: #7d8590; font-size: 11px; }
+
+/* Encrypted */
+.encYes { color: #00e676; font-weight: 600; font-size: 11px; }
+.encNo  { color: #ff5252; font-size: 11px; }
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 1rem;
+    border-top: 1px solid #21262d;
+}
+
+.pageBtn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: #30363d;
+}
+
+.pageBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    font-size: 12px;
+    color: #7d8590;
+}
