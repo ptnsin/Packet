@@ -9,6 +9,29 @@ exports.getHistory = async (req, res) => {
         });
         res.json(packets);
     } catch (err) {
-        res.status(500).json({ error: "ดึงข้อมูลล้มเหลว" });
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.getStats = async (req, res) => {
+    try {
+        const total = await prisma.packet.count();
+        const encrypted = await prisma.packet.count({ where: { isEncrypted: true } });
+        res.json({
+            total,
+            encrypted,
+            plain: total - encrypted
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.clearHistory = async (req, res) => {
+    try {
+        await prisma.packet.deleteMany();
+        res.json({ message: "History cleared by Admin" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };

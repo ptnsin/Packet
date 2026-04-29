@@ -4,31 +4,33 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { spawn } = require('child_process');
-const cors = require('cors'); // เพิ่ม CORS
+const cors = require('cors');
 require('dotenv').config();
 
-// นำเข้า Routes และ Middleware
 const authController = require('./src/controllers/authController');
 const packetRoutes = require('./src/routes/packetRoutes');
 const { verifyToken } = require('./src/middlewares/authMiddleware');
 
 const app = express();
-app.use(cors()); // อนุญาตให้ Frontend ข้ามโดเมนมาดึงข้อมูลได้
-app.use(express.json()); // สำคัญมาก! เพื่อให้ Login รับ username/password ได้
+app.use(cors());
+app.use(express.json());
 
-// --- API Routes ---
+// API Routes
 app.post('/api/login', authController.login);
-app.use('/api/packets', verifyToken, packetRoutes); // ต้อง Login ก่อนถึงจะดู History ได้
+app.use('/api/packets', verifyToken, packetRoutes);
 
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
+const io = new Server(server, { cors: { origin: "*" } });
 
 const PORT = process.env.PORT || 5000;
 const INTERFACE = process.env.INTERFACE_ID || '1';
 
-// --- Logic TShark (โค้ดเดิมของคุณที่ทำงานได้ดีอยู่แล้ว) ---
+// ฟังก์ชันตรวจจับโปรโตคอลอันตราย (Security Alerts)
+const checkUnsafe = (protocol) => {
+    const unsafe = ['http', 'ftp', 'telnet', 'tftp'];
+    return unsafe.some(p => protocol.toLowerCase().includes(p));
+};
+
 const startSniffing = () => {
     const tshark = spawn('tshark', [
         '-i', INTERFACE, '-l', '-T', 'ek',
@@ -50,7 +52,7 @@ const startSniffing = () => {
                     time: new Date().toLocaleTimeString()
                 };
 
-                // บันทึกลง DB
+                // บันทึกลง DB (Packet History Storage)
                 await prisma.packet.create({
                     data: {
                         sourceIp: packetData.src,
@@ -61,7 +63,17 @@ const startSniffing = () => {
                     }
                 });
 
+                // ส่งข้อมูล Real-time
                 io.emit('packet-received', packetData);
+
+                // ถ้าเจอโปรโตคอลอันตราย ให้ส่ง Alert (Security Alerts)
+                if (checkUnsafe(packetData.protocols)) {
+                    io.emit('security-alert', {
+                        message: `Detected Unsafe Protocol: ${packetData.protocols}`,
+                        src: packetData.src,
+                        time: packetData.time
+                    });
+                }
             } catch (err) {}
         });
     });
@@ -70,6 +82,4 @@ const startSniffing = () => {
 };
 
 startSniffing();
-server.listen(PORT, () => {
-    console.log(`Backend Engine running on http://localhost:${PORT}`);
-});
+server.listen(PORT, () => console.log(`Backend Engine running on http://localhost:${PORT}`));
