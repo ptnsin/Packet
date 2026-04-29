@@ -1,0 +1,23 @@
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 100;
+  animation: fadeUp 0.25s ease both;
+}
+
+.success {
+  background: rgba(0, 210, 168, 0.15);
+  border: 1px solid rgba(0, 210, 168, 0.4);
+  color: var(--accent);
+}
+
+.error {
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  color: var(--danger);
+}

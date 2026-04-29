@@ -1,0 +1,248 @@
+.main {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 1.5rem;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pageSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Table */
+.tableWrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tableTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badgeCount {
+  background: var(--surface2);
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 8px 16px;
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: 9px 16px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.4);
+  font-size: 13px;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: var(--surface2);
+}
+
+.tdId {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim) !important;
+}
+
+.tdDate {
+  font-size: 12px;
+  color: var(--text-muted) !important;
+}
+
+.username {
+  font-weight: 500;
+}
+
+.selfTag {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 6px;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.roleBadge.admin {
+  background: rgba(0, 210, 168, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 210, 168, 0.25);
+}
+
+.roleBadge.user {
+  background: rgba(31, 142, 241, 0.1);
+  color: var(--info);
+  border: 1px solid rgba(31, 142, 241, 0.25);
+}
+
+.btnDelete {
+  background: transparent;
+  border: 1px solid rgba(248, 81, 73, 0.25);
+  color: var(--danger);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.btnDelete:hover:not(:disabled) {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+.btnDelete:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.emptyRow {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 2rem !important;
+}
+
+/* Form Card */
+.formCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.formTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--accent);
+}
+
+.field input::placeholder {
+  color: var(--text-dim);
+}
+
+.field select option {
+  background: var(--surface2);
+}
+
+.btnCreate {
+  width: 100%;
+  background: var(--accent);
+  color: #0d1117;
+  border: none;
+  border-radius: 7px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btnCreate:hover {
+  opacity: 0.88;
+}
+
+.btnCreate:active {
+  transform: scale(0.98);
+}
+
+.btnCreate:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

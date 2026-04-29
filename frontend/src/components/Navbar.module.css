@@ -1,0 +1,91 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.logo span {
+  color: var(--accent);
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.liveLabel {
+  font-size: 11px;
+  color: var(--accent);
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.link {
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.link:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.link.active {
+  color: var(--text);
+}
+
+.roleBadge {
+  background: rgba(0, 210, 168, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 210, 168, 0.25);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.btnLogout {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 5px 12px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btnLogout:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
