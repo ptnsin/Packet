@@ -8,10 +8,13 @@ import styles from './DashboardPage.module.css'
 const API_BASE = '/api'
 
 function protocolColor(proto = '') {
-    if (proto.includes('tls')) return styles.protoTls      // สีเขียว
-    if (proto.includes('http')) return styles.protoHttp    // สีแดง
-    if (proto.includes('dns')) return styles.protoDns      // สีฟ้า
-    return styles.proto                                     // default
+    const p = proto.toLowerCase()
+    if (p.includes('tls') || p.includes('ssl'))  return styles.protoTls   // เขียว
+    if (p.includes('http'))                        return styles.protoHttp  // แดง
+    if (p.includes('dns'))                         return styles.protoDns   // ฟ้า
+    if (p.includes('udp'))                         return styles.protoUdp   // เหลือง
+    if (p.includes('tcp'))                         return styles.protoTcp   // ม่วง
+    return styles.proto                                                      // default
 }
 
 export default function DashboardPage() {
@@ -59,14 +62,14 @@ export default function DashboardPage() {
       const token = localStorage.getItem('token')
       // Dynamic import so build doesn't break if socket.io is unavailable
       import('socket.io-client').then(({ io }) => {
-        socket = io({ auth: { token } })
+        socket = io('http://localhost:5000', { auth: { token } })
         socket.on('packet-received', (packet) => {
           loadStats()
           loadPackets()
           pushPoint(packet.isEncrypted)
         })
         socket.on('security-alert', (data) => {
-          showAlert(data.message || 'Security Alert: พบ packet ที่น่าสงสัย')
+          showAlert(`${data.message} | จาก ${data.src}`)
         })
       }).catch(() => {})
     } catch {}

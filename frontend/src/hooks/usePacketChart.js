@@ -8,7 +8,9 @@ export function usePacketChart(canvasRef) {
     const now = Date.now()
     const labels = Array.from({ length: 12 }, (_, i) => {
       const d = new Date(now - (11 - i) * 5000)
-      return d.getMinutes() + ':' + String(d.getSeconds()).padStart(2, '0')
+      return String(d.getHours()).padStart(2, '0') + ':' +
+       String(d.getMinutes()).padStart(2, '0') + ':' +
+       String(d.getSeconds()).padStart(2, '0')
     })
     const encData = Array.from({ length: 12 }, () => 0)
     const plainData = Array.from({ length: 12 }, () => 0)
@@ -77,7 +79,9 @@ export function usePacketChart(canvasRef) {
     const chart = chartRef.current
     if (!chart) return
     const d = new Date()
-    const label = d.getMinutes() + ':' + String(d.getSeconds()).padStart(2, '0')
+    const label = String(d.getHours()).padStart(2, '0') + ':' +
+              String(d.getMinutes()).padStart(2, '0') + ':' +
+              String(d.getSeconds()).padStart(2, '0')
     chart.data.labels.push(label)
     chart.data.labels.shift()
     chart.data.datasets[0].data.push(isEncrypted ? 1 : 0)

@@ -176,3 +176,10 @@
   color: var(--text-dim);
   padding: 2rem !important;
 }
+
+.protoTls  { color: #00e676; font-size: 11px; }
+.protoHttp { color: #ff5252; font-size: 11px; }
+.protoDns  { color: #40c4ff; font-size: 11px; }
+.protoUdp  { color: #ffd740; font-size: 11px; }
+.protoTcp  { color: #ce93d8; font-size: 11px; }
+.proto     { color: #7d8590; font-size: 11px; }
