@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -9,6 +10,7 @@ require('dotenv').config();
 
 const authController = require('./src/controllers/authController');
 const packetRoutes = require('./src/routes/packetRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 const { verifyToken } = require('./src/middlewares/authMiddleware');
 
 const app = express();
@@ -17,7 +19,9 @@ app.use(express.json());
 
 // API Routes
 app.post('/api/login', authController.login);
+app.post('/api/register', authController.register);
 app.use('/api/packets', verifyToken, packetRoutes);
+app.use('/api/users', verifyToken, userRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
@@ -25,11 +29,10 @@ const io = new Server(server, { cors: { origin: "*" } });
 const PORT = process.env.PORT || 5000;
 const INTERFACE = process.env.INTERFACE_ID || '1';
 
-// ฟังก์ชันตรวจจับโปรโตคอลอันตราย (Security Alerts)
-const checkUnsafe = (protocol) => {
-    const unsafe = ['http', 'ftp', 'telnet', 'tftp'];
-    return unsafe.some(p => protocol.toLowerCase().includes(p));
-};
+// ✅ Security Alerts — โปรโตคอลอันตราย
+const UNSAFE_PROTOCOLS = ['http', 'ftp', 'telnet', 'tftp'];
+const checkUnsafe = (protocol) =>
+    UNSAFE_PROTOCOLS.some(p => protocol.toLowerCase().includes(p));
 
 const startSniffing = () => {
     const tshark = spawn('tshark', [
@@ -52,7 +55,7 @@ const startSniffing = () => {
                     time: new Date().toLocaleTimeString()
                 };
 
-                // บันทึกลง DB (Packet History Storage)
+                // บันทึกลง DB
                 await prisma.packet.create({
                     data: {
                         sourceIp: packetData.src,
@@ -66,11 +69,14 @@ const startSniffing = () => {
                 // ส่งข้อมูล Real-time
                 io.emit('packet-received', packetData);
 
-                // ถ้าเจอโปรโตคอลอันตราย ให้ส่ง Alert (Security Alerts)
+                // ✅ Security Alert — ส่ง socket พร้อม severity
                 if (checkUnsafe(packetData.protocols)) {
                     io.emit('security-alert', {
                         message: `Detected Unsafe Protocol: ${packetData.protocols}`,
                         src: packetData.src,
+                        dst: packetData.dst,
+                        protocol: packetData.protocols,
+                        severity: 'high',
                         time: packetData.time
                     });
                 }
@@ -78,8 +84,19 @@ const startSniffing = () => {
         });
     });
 
+    tshark.stderr.on('data', (err) => {
+        console.error('tshark error:', err.toString());
+    });
+
+    tshark.on('close', (code) => {
+        console.warn(`tshark exited with code: ${code}. Restarting in 3s...`);
+        setTimeout(startSniffing, 3000);
+    });
+
     console.log(`📡 Sniffing started on Interface: ${INTERFACE}`);
 };
 
 startSniffing();
 server.listen(PORT, () => console.log(`Backend Engine running on http://localhost:${PORT}`));
+
+module.exports = { prisma };
