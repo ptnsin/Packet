@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PacketWatch — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2333;
+  --border:rgba(48,54,61,0.8);--accent:#00d2a8;--accent2:#1f8ef1;
+  --danger:#f85149;--warning:#e3b341;
+  --text:#e6edf3;--text-muted:#7d8590;--text-dim:#484f58;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;position:relative;overflow:hidden;}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,210,168,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,210,168,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.glow{position:fixed;width:400px;height:400px;background:radial-gradient(circle,rgba(0,210,168,.06) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:0;}
+.card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2.5rem 2rem;width:100%;max-width:390px;animation:fadeUp .4s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
+.logo-icon{width:38px;height:38px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-icon svg{width:22px;height:22px;}
+.logo-text{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.logo-text span{color:var(--accent);}
+.login-title{font-size:21px;font-weight:600;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.75rem;}
+.field{margin-bottom:1rem;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase;}
+.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--accent);}
+.field input::placeholder{color:var(--text-dim);}
+.error-msg{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--danger);margin-bottom:1rem;display:none;}
+.error-msg.show{display:block;}
+.btn-login{width:100%;background:var(--accent);color:#0d1117;border:none;border-radius:8px;padding:11px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:.5rem;}
+.btn-login:hover{opacity:.88;}
+.btn-login:active{transform:scale(.98);}
+.btn-login:disabled{opacity:.4;cursor:not-allowed;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow"></div>
+<div class="card">
+  <div class="logo-row">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0d1117" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="logo-text"><span>PACKET</span>WATCH</div>
+  </div>
+  <div class="login-title">เข้าสู่ระบบ</div>
+  <div class="login-sub">Network Monitoring Dashboard</div>
+  <div class="error-msg" id="error-msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+  <form id="login-form">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="inp-user" placeholder="กรอก username" autocomplete="username" required/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="inp-pass" placeholder="กรอก password" autocomplete="current-password" required/>
+    </div>
+    <button class="btn-login" type="submit" id="btn-submit">เข้าสู่ระบบ</button>
+  </form>
+</div>
+<script>
+const API_BASE = '/api';
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('inp-user').value.trim();
+  const password = document.getElementById('inp-pass').value;
+  const errEl = document.getElementById('error-msg');
+  const btn = document.getElementById('btn-submit');
+
+  errEl.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'กำลังตรวจสอบ...';
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.message || 'เกิดข้อผิดพลาด';
+      errEl.classList.add('show');
+      document.getElementById('inp-pass').value = '';
+    } else {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.role);
+      window.location.href = 'dashboard.html';
+    }
+  } catch (err) {
+    errEl.textContent = 'ไม่สามารถเชื่อมต่อ Server ได้';
+    errEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'เข้าสู่ระบบ';
+  }
+});
+</script>
+</body>
+</html>
