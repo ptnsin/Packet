@@ -141,3 +141,22 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# --- Additional for Packet Project ---
+
+# Database & Docker
+database/mysql_data/      
+.docker-sync/
+docker-compose.override.yml
+
+# OS generated files
+Thumbs.db
+desktop.ini
+
+# IDE - VS Code
+.vscode/                  
+!.vscode/extensions.json  
+
+# Temp / Output
+docs/*.pdf                
+backend/temp/
