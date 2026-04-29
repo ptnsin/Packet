@@ -7,14 +7,22 @@ import styles from './DashboardPage.module.css'
 
 const API_BASE = '/api'
 
+// ✅ helper ป้องกัน Invalid Date crash
+function formatTimestamp(ts) {
+  if (!ts) return '-'
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return String(ts) // แสดงค่าดิบถ้า parse ไม่ได้
+  return d.toISOString().slice(0, 19).replace('T', ' ')
+}
+
 function protocolColor(proto = '') {
-    const p = proto.toLowerCase()
-    if (p.includes('tls') || p.includes('ssl'))  return styles.protoTls   // เขียว
-    if (p.includes('http'))                        return styles.protoHttp  // แดง
-    if (p.includes('dns'))                         return styles.protoDns   // ฟ้า
-    if (p.includes('udp'))                         return styles.protoUdp   // เหลือง
-    if (p.includes('tcp'))                         return styles.protoTcp   // ม่วง
-    return styles.proto                                                      // default
+  const p = proto.toLowerCase()
+  if (p.includes('tls') || p.includes('ssl')) return styles.protoTls
+  if (p.includes('http')) return styles.protoHttp
+  if (p.includes('dns')) return styles.protoDns
+  if (p.includes('udp')) return styles.protoUdp
+  if (p.includes('tcp')) return styles.protoTcp
+  return styles.proto
 }
 
 export default function DashboardPage() {
@@ -41,7 +49,7 @@ export default function DashboardPage() {
       if (res.status === 401) { logout(); navigate('/login'); return }
       const data = await res.json()
       setStats(data)
-    } catch {}
+    } catch { }
   }, [authHeaders, logout, navigate])
 
   const loadPackets = useCallback(async () => {
@@ -49,30 +57,37 @@ export default function DashboardPage() {
       const res = await fetch(`${API_BASE}/packets/history?limit=20`, { headers: authHeaders() })
       const data = await res.json()
       setPackets(data.data || [])
-    } catch {}
+    } catch { }
   }, [authHeaders])
 
   useEffect(() => {
     loadStats()
     loadPackets()
 
-    // Socket.io
     let socket
-    try {
+    import('socket.io-client').then(({ io }) => {
       const token = localStorage.getItem('token')
-      // Dynamic import so build doesn't break if socket.io is unavailable
-      import('socket.io-client').then(({ io }) => {
-        socket = io('http://localhost:5000', { auth: { token } })
-        socket.on('packet-received', (packet) => {
-          loadStats()
-          loadPackets()
-          pushPoint(packet.isEncrypted)
-        })
-        socket.on('security-alert', (data) => {
-          showAlert(`${data.message} | จาก ${data.src}`)
-        })
-      }).catch(() => {})
-    } catch {}
+      socket = io('http://localhost:5000', { auth: { token } })
+
+      socket.on('packet-received', (newPacket) => {
+        setPackets(prev => [newPacket, ...prev].slice(0, 20))
+
+        setStats(prev => ({
+          ...prev,
+          total: prev.total + 1,
+          encrypted: newPacket.isEncrypted ? prev.encrypted + 1 : prev.encrypted,
+          plain: !newPacket.isEncrypted ? prev.plain + 1 : prev.plain,
+        }))
+
+        pushPoint(newPacket.isEncrypted)
+      })
+
+      socket.on('security-alert', (data) => {
+        showAlert(`${data.message} | จาก ${data.src}`)
+      })
+    }).catch((err) => {
+      console.warn('socket.io-client load failed:', err)
+    })
 
     const interval = setInterval(() => {
       loadStats()
@@ -84,7 +99,7 @@ export default function DashboardPage() {
       socket?.disconnect()
       clearTimeout(alertTimerRef.current)
     }
-  }, [loadStats, loadPackets, pushPoint])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const encPct = stats.total ? Math.round((stats.encrypted / stats.total) * 100) : 0
 
@@ -143,7 +158,8 @@ export default function DashboardPage() {
             <tbody>
               {packets.map((p, i) => (
                 <tr key={i}>
-                  <td>{new Date(p.timestamp).toISOString().slice(0, 19).replace('T', ' ')}</td>
+                  {/* ✅ ใช้ formatTimestamp แทน — ป้องกัน RangeError: Invalid time value */}
+                  <td>{formatTimestamp(p.timestamp)}</td>
                   <td>{p.sourceIp}</td>
                   <td>{p.destIp}</td>
                   <td><span className={protocolColor(p.protocol)}>{p.protocol}</span></td>

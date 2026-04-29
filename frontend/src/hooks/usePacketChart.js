@@ -1,16 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import Chart from 'chart.js/auto'
 
 export function usePacketChart(canvasRef) {
   const chartRef = useRef(null)
 
   useEffect(() => {
+    // รอให้ canvas พร้อมก่อน
+    if (!canvasRef.current) return
+
     const now = Date.now()
     const labels = Array.from({ length: 12 }, (_, i) => {
       const d = new Date(now - (11 - i) * 5000)
       return String(d.getHours()).padStart(2, '0') + ':' +
-       String(d.getMinutes()).padStart(2, '0') + ':' +
-       String(d.getSeconds()).padStart(2, '0')
+        String(d.getMinutes()).padStart(2, '0') + ':' +
+        String(d.getSeconds()).padStart(2, '0')
     })
     const encData = Array.from({ length: 12 }, () => 0)
     const plainData = Array.from({ length: 12 }, () => 0)
@@ -71,25 +74,35 @@ export function usePacketChart(canvasRef) {
     })
 
     return () => {
+      // ✅ destroy แล้ว set null ทันที ป้องกัน pushPoint เรียก instance เก่า
       chartRef.current?.destroy()
+      chartRef.current = null
     }
   }, [canvasRef])
 
-  function pushPoint(isEncrypted) {
+  // ✅ useCallback เพื่อให้ reference stable — ไม่สร้าง function ใหม่ทุก render
+  const pushPoint = useCallback((isEncrypted) => {
     const chart = chartRef.current
-    if (!chart) return
+    // ✅ ตรวจ null (destroyed), data, datasets ครบ
+    if (!chart || !chart.data || !chart.data.datasets?.[0]) return
+
     const d = new Date()
-    const label = String(d.getHours()).padStart(2, '0') + ':' +
-              String(d.getMinutes()).padStart(2, '0') + ':' +
-              String(d.getSeconds()).padStart(2, '0')
+    const label =
+      String(d.getHours()).padStart(2, '0') + ':' +
+      String(d.getMinutes()).padStart(2, '0') + ':' +
+      String(d.getSeconds()).padStart(2, '0')
+
     chart.data.labels.push(label)
-    chart.data.labels.shift()
+    if (chart.data.labels.length > 12) chart.data.labels.shift()
+
     chart.data.datasets[0].data.push(isEncrypted ? 1 : 0)
-    chart.data.datasets[0].data.shift()
+    if (chart.data.datasets[0].data.length > 12) chart.data.datasets[0].data.shift()
+
     chart.data.datasets[1].data.push(isEncrypted ? 0 : 1)
-    chart.data.datasets[1].data.shift()
+    if (chart.data.datasets[1].data.length > 12) chart.data.datasets[1].data.shift()
+
     chart.update('none')
-  }
+  }, []) // chartRef เป็น ref ไม่ต้อง deps
 
   return { pushPoint }
 }

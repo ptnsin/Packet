@@ -46,38 +46,31 @@ const startSniffing = () => {
             if (!line.trim() || line.startsWith('{"index"')) return;
             try {
                 const raw = JSON.parse(line).layers;
+
+                // ✅ ใช้ชื่อ field ตรงกับ Prisma schema และ frontend
                 const packetData = {
-                    src: raw['ip_src']?.[0] || 'N/A',
-                    dst: raw['ip_dst']?.[0] || 'N/A',
-                    size: parseInt(raw['frame_len']?.[0] || 0),
-                    protocols: raw['frame_protocols']?.[0] || '',
+                    sourceIp:    raw['ip_src']?.[0] || 'N/A',
+                    destIp:      raw['ip_dst']?.[0] || 'N/A',
+                    length:      parseInt(raw['frame_len']?.[0] || 0),
+                    protocol:    raw['frame_protocols']?.[0] || '',
                     isEncrypted: raw['frame_protocols']?.[0]?.includes('tls') || false,
-                    time: new Date().toLocaleTimeString()
                 };
 
-                // บันทึกลง DB
-                await prisma.packet.create({
-                    data: {
-                        sourceIp: packetData.src,
-                        destIp: packetData.dst,
-                        length: packetData.size,
-                        protocol: packetData.protocols,
-                        isEncrypted: packetData.isEncrypted
-                    }
-                });
+                // บันทึกลง DB แล้วใช้ record ที่ได้กลับมา (มี id + timestamp จริง)
+                const saved = await prisma.packet.create({ data: packetData });
 
-                // ส่งข้อมูล Real-time
-                io.emit('packet-received', packetData);
+                // ✅ emit ด้วย record จาก DB — frontend ได้ field ครบ รวม timestamp ที่ถูกต้อง
+                io.emit('packet-received', saved);
 
                 // ✅ Security Alert — ส่ง socket พร้อม severity
-                if (checkUnsafe(packetData.protocols)) {
+                if (checkUnsafe(packetData.protocol)) {
                     io.emit('security-alert', {
-                        message: `Detected Unsafe Protocol: ${packetData.protocols}`,
-                        src: packetData.src,
-                        dst: packetData.dst,
-                        protocol: packetData.protocols,
+                        message: `Detected Unsafe Protocol: ${packetData.protocol}`,
+                        src: packetData.sourceIp,
+                        dst: packetData.destIp,
+                        protocol: packetData.protocol,
                         severity: 'high',
-                        time: packetData.time
+                        time: new Date().toISOString()
                     });
                 }
             } catch (err) {}
