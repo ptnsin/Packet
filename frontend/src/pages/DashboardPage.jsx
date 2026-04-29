@@ -18,25 +18,23 @@ function formatTimestamp(ts) {
 function protocolColor(proto = '') {
   const p = proto.toLowerCase()
   if (p.includes('tls') || p.includes('ssl')) return styles.protoTls
-  if (p.includes('http')) return styles.protoHttp
-  if (p.includes('dns')) return styles.protoDns
-  if (p.includes('udp')) return styles.protoUdp
-  if (p.includes('tcp')) return styles.protoTcp
+  if (p.includes('http'))                      return styles.protoHttp
+  if (p.includes('dns'))                       return styles.protoDns
+  if (p.includes('udp'))                       return styles.protoUdp
+  if (p.includes('tcp'))                       return styles.protoTcp
   return styles.proto
 }
 
 export default function DashboardPage() {
-  const { authHeaders, logout } = useAuth()
+  const { authHeaders, logout, role } = useAuth()
   const navigate = useNavigate()
 
-  const [stats, setStats]         = useState({ total: 0, encrypted: 0, plain: 0 })
-  const [packets, setPackets]     = useState([])
-  const [alert, setAlert]         = useState(null)
-  const [exporting, setExporting] = useState(null)
+  const [stats, setStats]           = useState({ total: 0, encrypted: 0, plain: 0 })
+  const [packets, setPackets]       = useState([])
+  const [alert, setAlert]           = useState(null)
+  const [exporting, setExporting]   = useState(null)
   const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 1 })
-
-  // ── Filter state ── ตรงกับ query params ที่ backend รองรับทุกตัว
-  const [filters, setFilters] = useState({
+  const [filters, setFilters]       = useState({
     protocol: '', encrypted: '', src: '', dst: '', startDate: '', endDate: '',
   })
   const [filterOpen, setFilterOpen] = useState(false)
@@ -45,7 +43,7 @@ export default function DashboardPage() {
   const canvasRef     = useRef(null)
   const { pushPoint } = usePacketChart(canvasRef)
   const alertTimerRef = useRef(null)
-  const isFilteredRef = useRef(false) // ใช้ใน socket closure
+  const isFilteredRef = useRef(false)
 
   function showAlert(msg) {
     setAlert(msg)
@@ -55,12 +53,12 @@ export default function DashboardPage() {
 
   function buildQuery(f, page = 1, limit = 20) {
     const p = new URLSearchParams({ page, limit })
-    if (f.protocol)      p.set('protocol',  f.protocol)
+    if (f.protocol)         p.set('protocol',  f.protocol)
     if (f.encrypted !== '') p.set('encrypted', f.encrypted)
-    if (f.src)           p.set('src',       f.src)
-    if (f.dst)           p.set('dst',       f.dst)
-    if (f.startDate)     p.set('startDate', f.startDate)
-    if (f.endDate)       p.set('endDate',   f.endDate)
+    if (f.src)              p.set('src',       f.src)
+    if (f.dst)              p.set('dst',       f.dst)
+    if (f.startDate)        p.set('startDate', f.startDate)
+    if (f.endDate)          p.set('endDate',   f.endDate)
     return p.toString()
   }
 
@@ -117,6 +115,18 @@ export default function DashboardPage() {
     finally  { setExporting(null) }
   }
 
+  async function handleClear() {
+    if (!confirm('ยืนยันลบข้อมูล Packet ทั้งหมด? ไม่สามารถกู้คืนได้')) return
+    try {
+      const res = await fetch(`${API_BASE}/packets/clear`, { method: 'DELETE', headers: authHeaders() })
+      if (!res.ok) throw new Error()
+      setPackets([])
+      setStats({ total: 0, encrypted: 0, plain: 0 })
+      setPagination({ total: 0, page: 1, totalPages: 1 })
+      showAlert('ลบข้อมูลทั้งหมดสำเร็จ')
+    } catch { showAlert('ลบข้อมูลไม่สำเร็จ') }
+  }
+
   useEffect(() => {
     const empty = { protocol: '', encrypted: '', src: '', dst: '', startDate: '', endDate: '' }
     loadStats()
@@ -125,10 +135,14 @@ export default function DashboardPage() {
     let socket
     import('socket.io-client').then(({ io }) => {
       const token = localStorage.getItem('token')
-      socket = io('http://localhost:5000', { auth: { token } })
-
+      socket = io('http://localhost:5000', {
+        auth: { token },
+        reconnectionAttempts: 3,
+        reconnectionDelay: 3000,
+        timeout: 5000,
+      })
+      socket.on('connect_error', () => socket.disconnect())
       socket.on('packet-received', (newPacket) => {
-        // ✅ real-time insert เฉพาะตอนไม่ได้ filter
         if (!isFilteredRef.current) {
           setPackets(prev => [newPacket, ...prev].slice(0, 20))
         }
@@ -141,7 +155,7 @@ export default function DashboardPage() {
         pushPoint(newPacket.isEncrypted)
       })
       socket.on('security-alert', (data) => showAlert(`${data.message} | จาก ${data.src}`))
-    }).catch(err => console.warn('socket.io-client load failed:', err))
+    }).catch(() => {})
 
     const interval = setInterval(loadStats, 15000)
     return () => { clearInterval(interval); socket?.disconnect(); clearTimeout(alertTimerRef.current) }
@@ -161,6 +175,7 @@ export default function DashboardPage() {
       )}
 
       <div className={styles.main}>
+
         {/* ── Stats ── */}
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
@@ -184,10 +199,9 @@ export default function DashboardPage() {
         <div className={styles.sectionTitle}>Packet Activity (Real-time)</div>
         <div className={styles.chartWrap}><canvas ref={canvasRef} /></div>
 
-        {/* ── Table wrap ── */}
+        {/* ── Table ── */}
         <div className={styles.tableWrap}>
 
-          {/* Header */}
           <div className={styles.tableHeader}>
             <div className={styles.tableTitle}>
               Recent Packets
@@ -195,25 +209,26 @@ export default function DashboardPage() {
             </div>
             <div className={styles.tableActions}>
               <span className={styles.badgeCount}>{pagination.total.toLocaleString()} total</span>
-
               <button
                 className={`${styles.exportBtn} ${filterOpen || isFiltered ? styles.filterBtnActive : ''}`}
                 onClick={() => setFilterOpen(o => !o)}
               >
                 🔍 Filter{isFiltered ? ' ●' : ''}
               </button>
-              <button className={styles.exportBtn}                              onClick={() => handleExport('csv')}  disabled={!!exporting}>{exporting === 'csv'  ? '⏳' : '⬇'} CSV</button>
-              <button className={styles.exportBtn}                              onClick={() => handleExport('json')} disabled={!!exporting}>{exporting === 'json' ? '⏳' : '⬇'} JSON</button>
-              <button className={`${styles.exportBtn} ${styles.exportPdf}`}    onClick={() => handleExport('pdf')}  disabled={!!exporting}>{exporting === 'pdf'  ? '⏳' : '📄'} PDF</button>
+              <button className={styles.exportBtn} onClick={() => handleExport('csv')}  disabled={!!exporting}>{exporting === 'csv'  ? '⏳' : '⬇'} CSV</button>
+              <button className={styles.exportBtn} onClick={() => handleExport('json')} disabled={!!exporting}>{exporting === 'json' ? '⏳' : '⬇'} JSON</button>
+              <button className={`${styles.exportBtn} ${styles.exportPdf}`} onClick={() => handleExport('pdf')} disabled={!!exporting}>{exporting === 'pdf' ? '⏳' : '📄'} PDF</button>
               <button className={styles.exportBtn} onClick={() => navigate('/geo')}>🌍 Geo</button>
+              {role === 'admin' && (
+                <button className={`${styles.exportBtn} ${styles.clearBtn}`} onClick={handleClear}>🗑 Clear</button>
+              )}
             </div>
           </div>
 
-          {/* ── Filter Panel ── */}
+          {/* Filter Panel */}
           {filterOpen && (
             <div className={styles.filterPanel}>
               <div className={styles.filterGrid}>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>Protocol</label>
                   <select className={styles.filterSelect} value={filters.protocol}
@@ -221,7 +236,6 @@ export default function DashboardPage() {
                     {PROTOCOL_OPTIONS.map(p => <option key={p} value={p}>{p || 'All'}</option>)}
                   </select>
                 </div>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>Encrypted</label>
                   <select className={styles.filterSelect} value={filters.encrypted}
@@ -231,31 +245,26 @@ export default function DashboardPage() {
                     <option value="false">NO</option>
                   </select>
                 </div>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>Source IP</label>
                   <input className={styles.filterInput} placeholder="e.g. 192.168"
                     value={filters.src} onChange={e => setFilters(f => ({ ...f, src: e.target.value }))} />
                 </div>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>Dest IP</label>
                   <input className={styles.filterInput} placeholder="e.g. 10.0.0"
                     value={filters.dst} onChange={e => setFilters(f => ({ ...f, dst: e.target.value }))} />
                 </div>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>Start Date</label>
                   <input type="datetime-local" className={styles.filterInput}
                     value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))} />
                 </div>
-
                 <div className={styles.filterField}>
                   <label className={styles.filterLabel}>End Date</label>
                   <input type="datetime-local" className={styles.filterInput}
                     value={filters.endDate} onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))} />
                 </div>
-
               </div>
               <div className={styles.filterActions}>
                 <button className={styles.filterApplyBtn} onClick={handleApplyFilter}>Apply Filter</button>
@@ -264,7 +273,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── Table ── */}
+          {/* Table */}
           <table className={styles.table}>
             <thead>
               <tr>
@@ -278,11 +287,7 @@ export default function DashboardPage() {
                   <td>{formatTimestamp(p.timestamp)}</td>
                   <td>{p.sourceIp}</td>
                   <td>{p.destIp}</td>
-                  <td>
-                    <span className={protocolColor(p.protocol)}>
-    {p.protocol.split(':').pop()}
-</span>
-                  </td>
+                  <td><span className={protocolColor(p.protocol)}>{p.protocol.split(':').pop()}</span></td>
                   <td>{p.length}</td>
                   <td className={p.isEncrypted ? styles.encYes : styles.encNo}>
                     {p.isEncrypted ? 'YES' : 'NO'}
@@ -295,7 +300,7 @@ export default function DashboardPage() {
             </tbody>
           </table>
 
-          {/* ── Pagination ── */}
+          {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className={styles.pagination}>
               <button className={styles.pageBtn} disabled={pagination.page <= 1}
