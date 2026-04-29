@@ -7,6 +7,13 @@ import styles from './DashboardPage.module.css'
 
 const API_BASE = '/api'
 
+function protocolColor(proto = '') {
+    if (proto.includes('tls')) return styles.protoTls      // สีเขียว
+    if (proto.includes('http')) return styles.protoHttp    // สีแดง
+    if (proto.includes('dns')) return styles.protoDns      // สีฟ้า
+    return styles.proto                                     // default
+}
+
 export default function DashboardPage() {
   const { authHeaders, logout } = useAuth()
   const navigate = useNavigate()
@@ -136,7 +143,7 @@ export default function DashboardPage() {
                   <td>{new Date(p.timestamp).toISOString().slice(0, 19).replace('T', ' ')}</td>
                   <td>{p.sourceIp}</td>
                   <td>{p.destIp}</td>
-                  <td><span className={styles.proto}>{p.protocol}</span></td>
+                  <td><span className={protocolColor(p.protocol)}>{p.protocol}</span></td>
                   <td>{p.length}</td>
                   <td className={p.isEncrypted ? styles.encYes : styles.encNo}>
                     {p.isEncrypted ? 'YES' : 'NO'}

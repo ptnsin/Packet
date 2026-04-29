@@ -53,11 +53,11 @@ export default function UsersPage() {
     if (!form.username || !form.password) { showToast('กรุณากรอกข้อมูลให้ครบ', 'error'); return }
     setCreating(true)
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(form),
-      })
+      const res = await fetch(`${API_BASE}/register`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(form),
+})
       const data = await res.json()
       if (!res.ok) { showToast(data.message || 'สร้างไม่สำเร็จ', 'error'); return }
       showToast(`สร้างผู้ใช้ "${form.username}" สำเร็จ`, 'success')
