@@ -11,6 +11,7 @@ require('dotenv').config();
 const authController = require('./src/controllers/authController');
 const packetRoutes = require('./src/routes/packetRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const geoRoutes = require('./src/routes/geoRoutes')
 const { verifyToken } = require('./src/middlewares/authMiddleware');
 
 const app = express();
@@ -22,6 +23,7 @@ app.post('/api/login', authController.login);
 app.post('/api/register', authController.register);
 app.use('/api/packets', verifyToken, packetRoutes);
 app.use('/api/users', verifyToken, userRoutes);
+app.use('/api/geo', verifyToken, geoRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
