@@ -111,17 +111,17 @@ exports.exportPDF = async (req, res) => {
         doc.moveDown(0.5);
         doc.fontSize(8);
 
-        const cols = { id: 30, time: 110, src: 100, dst: 100, proto: 130, enc: 50 };
+        const cols = { id: 55, time: 115, src: 105, dst: 105, proto: 110, enc: 40 }
         const startX = 40;
         let y = doc.y;
 
         // Column headers
-        doc.text('ID', startX, y);
-        doc.text('Timestamp', startX + cols.id, y);
-        doc.text('Source IP', startX + cols.id + cols.time, y);
-        doc.text('Dest IP', startX + cols.id + cols.time + cols.src, y);
-        doc.text('Protocol', startX + cols.id + cols.time + cols.src + cols.dst, y);
-        doc.text('Enc', startX + cols.id + cols.time + cols.src + cols.dst + cols.proto, y);
+        doc.text('ID',        startX, y, { width: cols.id })
+        doc.text('Timestamp', startX + cols.id, y, { width: cols.time })
+        doc.text('Source IP', startX + cols.id + cols.time, y, { width: cols.src })
+        doc.text('Dest IP',   startX + cols.id + cols.time + cols.src, y, { width: cols.dst })
+        doc.text('Protocol',  startX + cols.id + cols.time + cols.src + cols.dst, y, { width: cols.proto })
+        doc.text('Enc',       startX + cols.id + cols.time + cols.src + cols.dst + cols.proto, y, { width: cols.enc })
         doc.moveDown(0.5);
         doc.moveTo(startX, doc.y).lineTo(555, doc.y).stroke();
         doc.moveDown(0.3);
@@ -130,12 +130,12 @@ exports.exportPDF = async (req, res) => {
         packets.forEach(p => {
             if (doc.y > 720) doc.addPage();
             y = doc.y;
-            doc.text(String(p.id), startX, y, { width: cols.id });
-            doc.text(p.timestamp.toISOString().slice(0, 19).replace('T', ' '), startX + cols.id, y, { width: cols.time });
-            doc.text(p.sourceIp, startX + cols.id + cols.time, y, { width: cols.src });
-            doc.text(p.destIp, startX + cols.id + cols.time + cols.src, y, { width: cols.dst });
-            doc.text(p.protocol.slice(0, 20), startX + cols.id + cols.time + cols.src + cols.dst, y, { width: cols.proto });
-            doc.text(p.isEncrypted ? 'Yes' : 'No', startX + cols.id + cols.time + cols.src + cols.dst + cols.proto, y, { width: cols.enc });
+            doc.text(String(p.id),                                                  startX,                                              y, { width: cols.id,    ellipsis: true })
+            doc.text(p.timestamp.toISOString().slice(0, 19).replace('T', ' '),      startX + cols.id,                                    y, { width: cols.time,  ellipsis: true })
+            doc.text(p.sourceIp,                                                    startX + cols.id + cols.time,                         y, { width: cols.src,   ellipsis: true })
+            doc.text(p.destIp,                                                      startX + cols.id + cols.time + cols.src,              y, { width: cols.dst,   ellipsis: true })
+            doc.text(p.protocol.slice(0, 22),                                       startX + cols.id + cols.time + cols.src + cols.dst,   y, { width: cols.proto, ellipsis: true })
+            doc.text(p.isEncrypted ? 'Yes' : 'No',                                  startX + cols.id + cols.time + cols.src + cols.dst + cols.proto, y, { width: cols.enc })
             doc.moveDown(0.4);
         });
 

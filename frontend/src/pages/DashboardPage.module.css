@@ -111,6 +111,50 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* ✅ wrapper ฝั่งขวา — badge + ปุ่ม Export เรียงแถว */
+.tableActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ✅ ปุ่ม Export — ตาม dark theme */
+.exportBtn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.exportBtn:hover:not(:disabled) {
+  background: var(--border);
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.exportBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* PDF ปุ่ม — เน้นสีเขียว accent */
+.exportPdf {
+  border-color: rgba(0, 210, 168, 0.35);
+  color: var(--accent);
+}
+
+.exportPdf:hover:not(:disabled) {
+  background: rgba(0, 210, 168, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .tableTitle {
   font-size: 12px;
   font-weight: 600;
@@ -177,6 +221,140 @@
   padding: 2rem !important;
 }
 
+/* ── Filter Badge ── */
+.filterBadge {
+  margin-left: 8px;
+  background: rgba(0, 210, 168, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(0, 210, 168, 0.3);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+
+.filterBtnActive {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Filter Panel ── */
+.filterPanel {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px 12px;
+  background: rgba(22, 27, 34, 0.6);
+  animation: slideIn 0.2s ease;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 14px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 700px) {
+  .filterGrid { grid-template-columns: 1fr 1fr; }
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+
+.filterInput,
+.filterSelect {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.filterInput:focus,
+.filterSelect:focus {
+  border-color: var(--accent);
+}
+
+.filterInput::placeholder { color: var(--text-dim); }
+
+/* ── Filter Action Buttons ── */
+.filterActions {
+  display: flex;
+  gap: 8px;
+}
+
+.filterApplyBtn {
+  background: var(--accent);
+  color: #0d1117;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.filterApplyBtn:hover { opacity: 0.85; }
+
+.filterResetBtn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.filterResetBtn:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pageBtn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.pageBtn:hover:not(:disabled) { background: var(--border); color: var(--text); }
+.pageBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.pageInfo {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
 .protoTls  { color: #00e676; font-size: 11px; }
 .protoHttp { color: #ff5252; font-size: 11px; }
 .protoDns  { color: #40c4ff; font-size: 11px; }
